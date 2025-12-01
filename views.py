@@ -15,6 +15,7 @@ api = Blueprint('api', __name__)
 def add_new_product():
     user_input = request.get_json()
 
+    # product name already exist validation
     if Product.query.filter_by(product_name=user_input["product_name"]).first():
         return jsonify({
             "status" : "product name already exist"
@@ -42,6 +43,7 @@ def add_new_product():
 def add_new_location():
     user_input = request.get_json()
     
+    # locationname already exist validation
     if Location.query.filter_by(location_name = user_input["location_name"]).first():
         return jsonify({
             "status" : "location name already exist"
@@ -69,41 +71,64 @@ def add_new_location():
 def add_product_movement():
     data = request.get_json()
 
-    # both location check
+    # if both location empty validation
     if data["from_location"] is None and data["to_location"] is None:
         return jsonify({
             "message": "Either from_location or to_location must be provided"
         })
     
-    # from location
+    # from location empty validation
     if data["from_location"] is not None:
         if not Location.query.filter_by(location_id = data["from_location"]).first():
             return jsonify({
                 "message": "From location doesn't exist"
             })
         
-    # to location
+    # to location empty validation
     if data["to_location"] is not None:
         if not Location.query.filter_by(location_id = data["to_location"]).first():
             return jsonify({
                 "message": "To location doesn't exist"
             })
 
-    # product
+    # product empty validation
     if not Product.query.filter_by(product_id = data["product_id"]).first():
         return jsonify({
             "message" : "Product does not exist"
         })
 
+
     # check quantity in stock table
+    from_loc = Location.query.filter_by(location_name = data["from_location"]).first()
     
+    if not from_loc:
+        return jsonify({
+            "message": "Location does not exist"
+        })
+    
+    from_loc_id = from_loc.location_id
+
+    product = Stock.query.filter_by(location_id = from_loc_id, product_id = data["product_id"]).first()
+        
+    if not product:
+        return jsonify({
+            "message": "Location doesn't have the product"
+        })
+    
+    if product.qty < data["qty"]:
+        return jsonify({
+            "message": "Not enough stock"
+        })
+
+    to_loc = Location.query.filter_by(location_name = data["to_location"]).first()
+    to_loc_id = to_loc.location_id
 
 
     # adding in db
     try:
         new_product_movement = ProductMovement(
-            from_location = data["from_location"],
-            to_location = data["to_location"],
+            from_location = from_loc_id,
+            to_location = to_loc_id,
             product_id = data["product_id"],
             qty = data["qty"]
         )
@@ -132,6 +157,7 @@ def add_product_movement():
 def product_name_edit():
     data = request.get_json()
 
+    # data validation
     if not data:
         return jsonify({
             "error": "data not found"
@@ -153,6 +179,7 @@ def product_name_edit():
 def location_name_edit():
     data = request.get_json()
 
+    # data validation
     if not data:
         return jsonify({
             "error": "data not found"
@@ -213,11 +240,9 @@ def locations_available():
 @api.route('/get_productmovements', methods = ['GET'])
 def get_productmovements():
     productmovements = ProductMovement.query.all()
-    print(productmovements, type(productmovements))
 
     productmovement_list = []
     for productmovement in productmovements:
-        print(productmovement)
         productmovement_list.append({
             "movement_id": productmovement.movement_id,
             "time_stamp": productmovement.time_stamp,
@@ -243,6 +268,7 @@ def delete_product():
 
     product = Product.query.filter_by(product_id = data["product_id"]).first()
 
+    # product validation
     if not product:
         return jsonify({
             "message": "Product not found"
@@ -263,6 +289,7 @@ def delete_locations():
 
     location = Location.query.filter_by(location_id = data["location_id"]).first()
 
+    # location validation
     if not location:
         return jsonify({
             "message": "Location not found"

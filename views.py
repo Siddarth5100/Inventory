@@ -4,8 +4,11 @@ from flask import request, jsonify, render_template, Blueprint
 
 api = Blueprint('api', __name__)
 
-# API's
+# functions
 
+
+
+# API's
 
 # for adding new product in db
 @api.route('/add_new_product', methods = ['POST'])   
@@ -165,3 +168,109 @@ def location_name_edit():
         "location_name" : location.location_name
     })
 
+
+# fetching the product details
+@api.route('/get_products', methods = ['GET'])
+def get_products():
+    products = Product.query.all()
+
+    product_list = []
+    for product in products:
+        product_list.append({
+            "product_id": product.product_id,
+            "product_name": product.product_name
+        })
+
+    return jsonify(product_list)
+
+# rendering products available
+@api.route('/products_available', methods = ['GET'])
+def products_available():
+    return render_template('products.html')
+
+
+# feching the location details
+@api.route('/get_locations', methods = ['GET'])
+def get_locations():
+    locations = Location.query.all()
+
+    location_list = []
+    for location in locations:
+        location_list.append({
+            "location_id": location.location_id,
+            "location_name": location.location_name
+        })
+
+    return jsonify(location_list)
+
+# rendering locations available
+@api.route('/locations_available', methods = ['GET'])
+def locations_available():
+    return render_template('locations.html')
+
+
+# fetching productmovements details
+@api.route('/get_productmovements', methods = ['GET'])
+def get_productmovements():
+    productmovements = ProductMovement.query.all()
+    print(productmovements, type(productmovements))
+
+    productmovement_list = []
+    for productmovement in productmovements:
+        print(productmovement)
+        productmovement_list.append({
+            "movement_id": productmovement.movement_id,
+            "time_stamp": productmovement.time_stamp,
+            "from_location": productmovement.from_location,
+            "to_location": productmovement.to_location,
+            "product_id": productmovement.product_id,
+            "qty": productmovement.qty
+        })
+        
+
+    return jsonify(productmovement_list)
+
+# rendering the productmovements_available
+@api.route('/productmovements_available', methods = ['GET'])
+def productmovements_available():
+    return render_template('productmovements.html')
+
+
+# delete product
+@api.route('/delete_product', methods = ['DELETE'])
+def delete_product():
+    data = request.get_json()
+
+    product = Product.query.filter_by(product_id = data["product_id"]).first()
+
+    if not product:
+        return jsonify({
+            "message": "Product not found"
+        })
+
+    db.session.delete(product)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Product deleted successfully"
+    })
+
+
+# delete location
+@api.route('/delete_location', methods = ['DELETE'])
+def delete_locations():
+    data = request.get_json()
+
+    location = Location.query.filter_by(location_id = data["location_id"]).first()
+
+    if not location:
+        return jsonify({
+            "message": "Location not found"
+        })
+    
+    db.session.delete(location)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Location deleted successfully"
+    })

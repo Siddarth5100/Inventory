@@ -71,70 +71,110 @@ def add_new_location():
 def add_product_movement():
     data = request.get_json()
 
-    # if both location empty validation
-    if data["from_location"] is None and data["to_location"] is None:
+    # input validations
+
+    # if both location is empty
+    if not data["from_location"] and not data["to_location"]:
         return jsonify({
             "message": "Either from_location or to_location must be provided"
         })
-    
-    # from location empty validation
-    if data["from_location"] is not None:
-        if not Location.query.filter_by(location_id = data["from_location"]).first():
-            return jsonify({
-                "message": "From location doesn't exist"
-            })
-        
-    # to location empty validation
-    if data["to_location"] is not None:
-        if not Location.query.filter_by(location_id = data["to_location"]).first():
-            return jsonify({
-                "message": "To location doesn't exist"
-            })
 
-    # product empty validation
-    if not Product.query.filter_by(product_id = data["product_id"]).first():
-        return jsonify({
-            "message" : "Product does not exist"
-        })
+    # checking location & fetching the from_location id
+    from_loc = None
+    from_loc_id = None
+    if data["from_location"]:
+        from_loc = Location.query.filter_by(location_name = data["from_location"]).first()
+
+        if from_loc:
+            from_loc_id = from_loc.location_id
 
 
-    # check quantity in stock table
-    from_loc = Location.query.filter_by(location_name = data["from_location"]).first()
-    
-    if not from_loc:
-        return jsonify({
-            "message": "Location does not exist"
-        })
-    
-    from_loc_id = from_loc.location_id
-
-    product = Stock.query.filter_by(location_id = from_loc_id, product_id = data["product_id"]).first()
-        
-    if not product:
-        return jsonify({
-            "message": "Location doesn't have the product"
-        })
-    
-    if product.qty < data["qty"]:
-        return jsonify({
-            "message": "Not enough stock"
-        })
-
+    # checking location & fetching the to_location id
     to_loc = Location.query.filter_by(location_name = data["to_location"]).first()
+    
+    if not to_loc:
+        return jsonify({
+            "message": "To location does not exist",
+            "location_name": data["to_location"]
+        })
     to_loc_id = to_loc.location_id
 
+    # checking the product and fetching the product_id
+    product = Product.query.filter_by(product_name = data["product"]).first()
+   
+    if not product:
+        return jsonify({
+            "message": "Product does not exist"
+        })
+  
+    prod_id = product.product_id
 
-    # adding in db
+    # checking the stock quantity
+    # check is product available in the stock table
+    if from_loc_id:
+        stock_row = Stock.query.filter_by(location_id = from_loc_id, product_id = prod_id).first()
+
+        if not stock_row:
+            return jsonify({
+                "message": "Location does not have this product"
+            })
+    
+        # check is stock is available in the location
+        if stock_row.qty < data["qty"]:
+            return jsonify({
+                "message": "Insufficient stock at this location",
+                "available_qty": stock_row.qty
+            })
+
+
+    # adding productmovement in db
     try:
         new_product_movement = ProductMovement(
             from_location = from_loc_id,
             to_location = to_loc_id,
-            product_id = data["product_id"],
+            product_id = prod_id,
             qty = data["qty"]
         )
 
         db.session.add(new_product_movement)
-        # db.session.commit()
+        
+        #adding/updating the stock
+        # internal movement both from_location and to_location
+        if from_loc_id and to_loc_id:
+            stock_from = Stock.query.filter_by(location_id = from_loc_id, product_id = prod_id).first()    
+        
+            if stock_from:
+                stock_from.qty -= data["qty"]
+
+            stock_to = Stock.query.filter_by(location_id = to_loc_id, product_id = prod_id).first()
+        
+            if stock_to:
+                stock_to.qty += data["qty"]
+        
+            else:
+                new_stock = Stock(
+                    product_id = prod_id,
+                    location_id = to_loc_id,
+                    qty = data["qty"]
+                )
+                db.session.add(new_stock)
+
+        # inward movement only to_location
+        if not from_loc_id and to_loc_id:
+            existing_stock = Stock.query.filter_by(product_id = prod_id, location_id = to_loc_id).first()
+    
+            if existing_stock:
+                existing_stock.qty += data["qty"]
+            else:
+                new_stock_update = Stock(
+                    product_id = prod_id,
+                    location_id = to_loc_id,
+                    qty = data["qty"]
+                )
+
+                db.session.add(new_stock_update)
+            
+        db.session.commit()    
 
 
     except Exception as e:
@@ -150,7 +190,7 @@ def add_product_movement():
         "product_id": new_product_movement.product_id,
         "qty": new_product_movement.qty
     })
-    
+
 
 # edit product name
 @api.route('/product_name_edit', methods = ['PATCH'])
@@ -166,7 +206,7 @@ def product_name_edit():
     product = Product.query.filter_by(product_id = data["product_id"]).first()  
     product.product_name = data["product_name"]
 
-    # db.session.commit()
+    db.session.commit()
 
     return jsonify({
         "message": "product_name successfully updated",
@@ -188,7 +228,7 @@ def location_name_edit():
     location = Location.query.filter_by(location_id = data["location_id"]).first()
     location.location_name = data["location_name"]
 
-    # db.session.commit()
+    db.session.commit()
 
     return jsonify({
         "message" : "location_name successfully updated",
@@ -301,3 +341,4 @@ def delete_locations():
     return jsonify({
         "message": "Location deleted successfully"
     })
+

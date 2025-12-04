@@ -251,7 +251,7 @@ def get_products():
     return jsonify(product_list)
 
 # rendering products available
-@api.route('/products_available', methods = ['GET'])
+@api.route('/products', methods = ['GET'])
 def products_available():
     return render_template('products.html')
 
@@ -271,7 +271,7 @@ def get_locations():
     return jsonify(location_list)
 
 # rendering locations available
-@api.route('/locations_available', methods = ['GET'])
+@api.route('/locations', methods = ['GET'])
 def locations_available():
     return render_template('locations.html')
 
@@ -296,7 +296,7 @@ def get_productmovements():
     return jsonify(productmovement_list)
 
 # rendering the productmovements_available
-@api.route('/productmovements_available', methods = ['GET'])
+@api.route('/productmovements', methods = ['GET'])
 def productmovements_available():
     return render_template('productmovements.html')
 
@@ -342,3 +342,8 @@ def delete_locations():
         "message": "Location deleted successfully"
     })
 
+
+# home route
+@api.route('/home', methods = ['GET'])
+def home_page():
+    return render_template('index.html')

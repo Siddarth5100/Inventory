@@ -21,11 +21,14 @@ class ProductMovement(db.Model):
     __tablename__ = "productmovement"
     movement_id = db.Column(db.Integer, primary_key = True, autoincrement = True)
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
-    from_location = db.Column(db.Integer, db.ForeignKey('location.location_id'))
-    to_location = db.Column(db.Integer, db.ForeignKey('location.location_id'))
+    from_location_id = db.Column(db.Integer, db.ForeignKey('location.location_id'))
+    to_location_id = db.Column(db.Integer, db.ForeignKey('location.location_id'))
     product_id = db.Column(db.Integer, db.ForeignKey('product.product_id'))
     qty = db.Column(db.Integer, nullable = False)
 
+    from_location = db.relationship('Location', foreign_keys=[from_location_id])
+    to_location = db.relationship('Location', foreign_keys=[to_location_id])
+    product = db.relationship('Product')
 
 def create_tables():
     db.create_all()

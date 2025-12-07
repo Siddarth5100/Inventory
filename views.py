@@ -253,7 +253,8 @@ def get_products():
 # rendering products available
 @api.route('/products', methods = ['GET'])
 def products_available():
-    return render_template('products.html')
+    products = Product.query.all()
+    return render_template('products.html', products=products)
 
 
 # feching the location details
@@ -273,11 +274,12 @@ def get_locations():
 # rendering locations available
 @api.route('/locations', methods = ['GET'])
 def locations_available():
-    return render_template('locations.html')
+    locations = Location.query.all()
+    return render_template('locations.html', locations=locations)
 
 
 # fetching productmovements details
-@api.route('/get_productmovements', methods = ['GET'])
+@api.route('/productmovements', methods = ['GET'])
 def get_productmovements():
     productmovements = ProductMovement.query.all()
 
@@ -285,20 +287,20 @@ def get_productmovements():
     for productmovement in productmovements:
         productmovement_list.append({
             "movement_id": productmovement.movement_id,
-            "time_stamp": productmovement.time_stamp,
-            "from_location": productmovement.from_location,
-            "to_location": productmovement.to_location,
-            "product_id": productmovement.product_id,
+            "time_stamp": productmovement.timestamp,
+            "from_location": productmovement.from_location.location_name if productmovement.from_location else "N/A",
+            "to_location": productmovement.to_location.location_name if productmovement.to_location else "N/A",
+            "product": productmovement.product.product_name if productmovement.product else "N/A",
             "qty": productmovement.qty
         })
         
 
-    return jsonify(productmovement_list)
+    return render_template('productmovements.html', productmovements=productmovement_list)
 
 # rendering the productmovements_available
-@api.route('/productmovements', methods = ['GET'])
-def productmovements_available():
-    return render_template('productmovements.html')
+# @api.route('/productmovements', methods = ['GET'])
+# def productmovements_available():
+#     return render_template('productmovements.html')
 
 
 # delete product
@@ -347,3 +349,10 @@ def delete_locations():
 @api.route('/home', methods = ['GET'])
 def home_page():
     return render_template('index.html')
+
+@api.route('/')
+def home():
+    locations = Location.query.all()
+    products = Product.query.all()
+
+    return render_template('index.html', locations=locations, products=products)

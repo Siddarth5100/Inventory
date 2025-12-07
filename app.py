@@ -12,7 +12,6 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app) 
 migrate = Migrate(app, db)
 
-
 app.register_blueprint(api)
 
 if __name__ == "__main__":

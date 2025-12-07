@@ -4,10 +4,6 @@ from flask import request, jsonify, render_template, Blueprint
 
 api = Blueprint('api', __name__)
 
-# functions
-
-
-
 # API's
 
 # for adding new product in db
@@ -83,14 +79,13 @@ def add_product_movement():
     from_loc = None
     from_loc_id = None
     if data["from_location"]:
-        from_loc = Location.query.filter_by(location_name = data["from_location"]).first()
+        from_loc = Location.query.filter_by(location_id= data["from_location"]).first()
 
         if from_loc:
             from_loc_id = from_loc.location_id
 
-
     # checking location & fetching the to_location id
-    to_loc = Location.query.filter_by(location_name = data["to_location"]).first()
+    to_loc = Location.query.filter_by(location_id = data["to_location"]).first()
     
     if not to_loc:
         return jsonify({
@@ -100,7 +95,7 @@ def add_product_movement():
     to_loc_id = to_loc.location_id
 
     # checking the product and fetching the product_id
-    product = Product.query.filter_by(product_name = data["product"]).first()
+    product = Product.query.filter_by(product_id = data["product"]).first()
    
     if not product:
         return jsonify({
@@ -108,6 +103,7 @@ def add_product_movement():
         })
   
     prod_id = product.product_id
+
 
     # checking the stock quantity
     # check is product available in the stock table
@@ -130,8 +126,8 @@ def add_product_movement():
     # adding productmovement in db
     try:
         new_product_movement = ProductMovement(
-            from_location = from_loc_id,
-            to_location = to_loc_id,
+            from_location_id = from_loc_id,
+            to_location_id = to_loc_id,
             product_id = prod_id,
             qty = data["qty"]
         )
@@ -185,8 +181,8 @@ def add_product_movement():
     
     return jsonify({
         "status": "success",
-        "from_location": new_product_movement.from_location,
-        "to_location": new_product_movement.to_location,
+        "from_location": new_product_movement.from_location_id,
+        "to_location": new_product_movement.to_location_id,
         "product_id": new_product_movement.product_id,
         "qty": new_product_movement.qty
     })
@@ -240,15 +236,15 @@ def location_name_edit():
 @api.route('/get_products', methods = ['GET'])
 def get_products():
     products = Product.query.all()
-
     product_list = []
+    
     for product in products:
         product_list.append({
             "product_id": product.product_id,
             "product_name": product.product_name
         })
 
-    return jsonify(product_list)
+    return jsonify({"products": product_list})
 
 # rendering products available
 @api.route('/products', methods = ['GET'])
@@ -261,15 +257,15 @@ def products_available():
 @api.route('/get_locations', methods = ['GET'])
 def get_locations():
     locations = Location.query.all()
-
     location_list = []
+
     for location in locations:
         location_list.append({
-            "location_id": location.location_id,
+            "location_id" : location.location_id,
             "location_name": location.location_name
         })
 
-    return jsonify(location_list)
+    return jsonify({"locations": location_list})
 
 # rendering locations available
 @api.route('/locations', methods = ['GET'])
@@ -292,15 +288,9 @@ def get_productmovements():
             "to_location": productmovement.to_location.location_name if productmovement.to_location else "N/A",
             "product": productmovement.product.product_name if productmovement.product else "N/A",
             "qty": productmovement.qty
-        })
-        
+        })        
 
     return render_template('productmovements.html', productmovements=productmovement_list)
-
-# rendering the productmovements_available
-# @api.route('/productmovements', methods = ['GET'])
-# def productmovements_available():
-#     return render_template('productmovements.html')
 
 
 # delete product
@@ -350,9 +340,34 @@ def delete_locations():
 def home_page():
     return render_template('index.html')
 
+# location products
 @api.route('/')
 def home():
     locations = Location.query.all()
     products = Product.query.all()
 
     return render_template('index.html', locations=locations, products=products)
+
+
+# for getting the stock
+@api.route('/get_stock', methods=['GET'])
+def get_stock():
+    stock_items = db.session.query(
+        Stock,
+        Product.product_name,
+        Location.location_name
+    ).join(Product, Stock.product_id == Product.product_id
+    ).join(Location, Stock.location_id == Location.location_id
+    ).all()
+
+    stock_list = []
+    for stock, product_name, location_name in stock_items:
+        stock_list.append({
+            "product_id": stock.product_id,
+            "product_name": product_name,
+            "location_id": stock.location_id,
+            "location_name": location_name,
+            "qty": stock.qty
+        })
+
+    return jsonify({"stock": stock_list})

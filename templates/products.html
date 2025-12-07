@@ -27,25 +27,29 @@
                         <tr>
                             <th>Product ID</th>
                             <th>Product Name</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead> 
                 
                     <tbody id="product-table">
-                        {%%}
-                        {%%}
-                        <tr>
-                            <td>{{}}</td>
-                            <td>{{}}</td>
-                            <td>
-                                <button class="btn btn-primary px-4">Edit</button>
-                            </td>
-                        </tr>
+                        {% if products %}
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.product_id }}</td>
+                                <td>{{ product.product_name }}</td>
+                                <td>
+                                    <button class="btn btn-primary px-4">Edit</button>
+                                </td>
+                            </tr>
                             {% endfor %}
-                            {% else %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No products available</td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
-                <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+                <a href="/home" class="btn btn-secondary mt-3">Back to Home</a>
             </div>
         </div>
     </div>

@@ -36,11 +36,26 @@
                     </thead>
 
                     <tbody id="Movement-table">
-
+                        {% if productmovements %}
+                            {% for movements in productmovements%}
+                            <tr>
+                                <td>{{ movements.movement_id }}</td>
+                                <td>{{ movements.time_stamp }}</td>
+                                <td>{{ movements.from_location }}</td>
+                                <td>{{ movements.to_location }}</td>
+                                <td>{{ movements.product }}</td>
+                                <td>{{ movements.qty }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">No movement logs available</td>
+                            </tr>
+                        {% endif %}
                     </tbody>
 
                 </table>
-                <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+                <a href="/home" class="btn btn-secondary mt-3">Back to Home</a>
             </div>
         </div>
     </div>

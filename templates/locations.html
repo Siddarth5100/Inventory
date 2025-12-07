@@ -27,25 +27,29 @@
                         <tr>
                             <th>Location ID</th>
                             <th>Location Name</th>
-                            <th>Action</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
 
                     <tbody id="location-table">
-                        {%%}
-                        {%%}
-                        <tr>
-                            <td>{{}}</td>
-                            <td>{{}}</td>
-                            <td>
-                                <button class="btn btn-primary px-4">Edit</button>
-                            </td>
-                        </tr>
-                            {% end for %}
-                            {% else %}
+                        {% if locations %}
+                            {% for location in locations %}
+                            <tr>
+                                <td>{{ location.location_id }}</td>
+                                <td>{{ location.location_name }}</td>
+                                <td>
+                                    <button class="btn btn-primary px-4" data-id="{{ location.location_id}}">Edit</button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center">No locations available</td>
+                            </tr>
+                        {% endif %}
                     </tbody>
                 </table>
-                <a href="/" class="btn btn-secondary mt-3">Back to Home</a>
+                <a href="/home" class="btn btn-secondary mt-3">Back to Home</a>
             </div>
         </div>    
     </div>

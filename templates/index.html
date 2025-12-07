@@ -24,18 +24,20 @@
                 <div class="card mt-3 w-75">
                     <div class="card-header">Location:</div>
                     <div class="card-body">
-                        <input type="text" class="form-control" placeholder="Enter Location">
-                        <button class="btn btn-primary mt-2 me-2">Add Location</button>
-                        <button class="btn btn-secondary mt-2">View Location</button>
+                        <input type="text" id="location-Input" class="form-control" placeholder="Enter Location">
+                        <button id="add-Location-Btn" class="btn btn-primary mt-2 me-2">Add Location</button>
+                        <!-- <button id="view-Location-Btn" class="btn btn-secondary mt-2">View Location</button> -->
+                        <a href="/locations" class="btn btn-secondary mt-2">View Locations</a>
                     </div>
                 </div>
 
                 <div class="card mt-3 w-75">
                     <div class="card-header">Product:</div>
                     <div class="card-body">
-                        <input type="text" class="form-control" placeholder="Enter Product">
-                        <button class="btn btn-primary mt-2 me-2">Add Product</button>
-                        <button class="btn btn-secondary mt-2">View Product</button>
+                        <input type="text" id="product-Input" class="form-control" placeholder="Enter Product">
+                        <button id="add-Product-Btn" class="btn btn-primary mt-2 me-2">Add Product</button>
+                        <!-- <button id="view-Product-Btn" class="btn btn-secondary mt-2">View Product</button> -->
+                         <a href="/products" class="btn btn-secondary mt-2">View Products</a>
                     </div>
                 </div>
             </div>
@@ -51,20 +53,32 @@
                     <div class = "row">
 
                         <div class = "col-3">
-                            <select class="form-select">
-                                <option selected>From location</option>
+                            <select class="form-select" name="from_location" id="fromLocation">
+                                <option value="" selected disabled>From Location</option>
+                                <option value="0">None</option>
+                                {% for loc in locations %}
+                                    <option value="{{ loc.location_id}}">{{ loc.location_name}}</option>
+                                {% endfor %}    
                             </select>
                         </div>
 
                          <div class = "col-3">
-                             <select class="form-select">
-                                <option selected>To location</option>
+                             <select class="form-select" name="to_location">
+                                <option value="" selected disabled>To location</option>
+                                <option value="">None</option>
+                                {% for loc in locations %}
+                                    <option value="{{ loc.location_id}}">{{ loc.location_name}}</option>
+                                {% endfor %}
                             </select>
                         </div>
 
                          <div class = "col-3">
-                             <select class="form-select">
-                                <option selected>Product name</option>
+                             <select class="form-select" name="product">
+                                <option value="" selected disabled>Product name</option>
+                                <option value="">None</option>
+                                {% for prod in products %}
+                                    <option value="{{ prod.product_id }}">{{ prod.product_name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                             
@@ -72,18 +86,23 @@
                             <input type="number" class="form-control" placeholder="Qty">
                         </div>
                     </div>
+
                     <div class = "row">
                         <div class="col-12">
                         <button class="btn btn-primary mt-2 me-2">Make Movement</button>
-                        <button class="btn btn-secondary mt-2">View Movement Logs</button>
+                        <!-- <button class="btn btn-secondary mt-2">View Movement Logs</button> -->
+                        <a href="/productmovements" class="btn btn-secondary mt-2">View Movement Logs</a>
                         </div>
                     </div>
+
                 </div>               
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="static/js/main.js"></script>
+
 </body>
 
 </html>

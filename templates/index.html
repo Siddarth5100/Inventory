@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    
     <header class="bg-dark text-white py-1">
         <div class="container">
             <h1 class="text-center">Inventory Management</h1>
@@ -16,17 +17,21 @@
     </header>
 
     <div class="container">
-        <div class = "row">
-
-            
+        <div class = "row">  
             <div class = "col-6">
                                
                 <div class="card mt-3 w-75">
                     <div class="card-header">Location:</div>
                     <div class="card-body">
+                        
                         <input type="text" id="location-Input" class="form-control" placeholder="Enter Location">
                         <button id="add-Location-Btn" class="btn btn-primary mt-2 me-2">Add Location</button>
-                        <!-- <button id="view-Location-Btn" class="btn btn-secondary mt-2">View Location</button> -->
+                        
+                        <div id="locationAlert" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+                            Location added successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
                         <a href="/locations" class="btn btn-secondary mt-2">View Locations</a>
                     </div>
                 </div>
@@ -34,18 +39,42 @@
                 <div class="card mt-3 w-75">
                     <div class="card-header">Product:</div>
                     <div class="card-body">
+
                         <input type="text" id="product-Input" class="form-control" placeholder="Enter Product">
                         <button id="add-Product-Btn" class="btn btn-primary mt-2 me-2">Add Product</button>
-                        <!-- <button id="view-Product-Btn" class="btn btn-secondary mt-2">View Product</button> -->
-                         <a href="/products" class="btn btn-secondary mt-2">View Products</a>
+                        
+                        <div id="productAlert" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+                            Product added successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>                     
+
+                        <a href="/products" class="btn btn-secondary mt-2">View Products</a>
                     </div>
                 </div>
             </div>
 
 
             <div class = "col-6">
-                
-            </div>
+                <div class="card mt-3 w-100">
+                    <div class="card-header">Stock Details</div>
+                    <div class="card-body">
+                        <div style="max-height: 260px; overflow-y: auto;">
+                            
+                            <table class="table table-striped mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Location</th>
+                                        <th>Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="stockTableBody"></tbody>
+                            </table>
+                        
+                        </div>
+                    </div>
+                </div>
+            </div>    
               
             <div class= "card mt-3 w-75">
                 <div class="card-header">Product movements:</div>
@@ -55,25 +84,25 @@
                         <div class = "col-3">
                             <select class="form-select" name="from_location" id="fromLocation">
                                 <option value="" selected disabled>From Location</option>
-                                <option value="0">None</option>
+                                <option value="">None</option>
                                 {% for loc in locations %}
-                                    <option value="{{ loc.location_id}}">{{ loc.location_name}}</option>
+                                    <option value="{{ loc.location_id }}">{{ loc.location_name }}</option>
                                 {% endfor %}    
                             </select>
                         </div>
 
-                         <div class = "col-3">
-                             <select class="form-select" name="to_location">
+                        <div class = "col-3">
+                            <select class="form-select" name="to_location" id="toLocation">
                                 <option value="" selected disabled>To location</option>
                                 <option value="">None</option>
                                 {% for loc in locations %}
-                                    <option value="{{ loc.location_id}}">{{ loc.location_name}}</option>
+                                    <option value="{{ loc.location_id }}">{{ loc.location_name }}</option>
                                 {% endfor %}
                             </select>
                         </div>
 
-                         <div class = "col-3">
-                             <select class="form-select" name="product">
+                        <div class = "col-3">
+                            <select class="form-select" name="product" id="productSelect">
                                 <option value="" selected disabled>Product name</option>
                                 <option value="">None</option>
                                 {% for prod in products %}
@@ -82,15 +111,21 @@
                             </select>
                         </div>
                             
-                         <div class = "col-3">
-                            <input type="number" class="form-control" placeholder="Qty">
+                        <div class = "col-3">
+                            <input type="number" class="form-control" id="movementQty" placeholder="Qty">
                         </div>
+                    
                     </div>
 
                     <div class = "row">
                         <div class="col-12">
-                        <button class="btn btn-primary mt-2 me-2">Make Movement</button>
-                        <!-- <button class="btn btn-secondary mt-2">View Movement Logs</button> -->
+                        <button class="btn btn-primary mt-2 me-2" id="makeMovementBtn">Make Movement</button>
+                        
+                        <div id="movementAlert" class="alert alert-success alert-dismissible fade show" role="alert" style="display: none;">
+                            Product movement recorded successfully!
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
                         <a href="/productmovements" class="btn btn-secondary mt-2">View Movement Logs</a>
                         </div>
                     </div>
@@ -104,7 +139,6 @@
     <script src="static/js/main.js"></script>
 
 </body>
-
 </html>
 
 
